@@ -13,7 +13,9 @@ import {
   Mail,
   Briefcase,
   FileText,
-  Map as MapIcon
+  Map as MapIcon,
+  ChevronLeft,
+  Undo2
 } from 'lucide-react';
 import { Point, CRS, LandDeclaration } from '../types';
 import { cn } from '../lib/utils';
@@ -24,8 +26,8 @@ interface DeclarationFormProps {
   areaHa: number;
   crs: CRS;
   setCrs: (crs: CRS) => void;
-  onAddPoint: (x: number, y: number, crs: CRS) => void;
-  onRemovePoint: (index: number) => void;
+  onUndo: () => void;
+  onClear: () => void;
   onSave: (data: Partial<LandDeclaration>) => void;
   loading?: boolean;
 }
@@ -36,13 +38,11 @@ export const DeclarationForm: React.FC<DeclarationFormProps> = ({
   areaHa,
   crs,
   setCrs,
-  onAddPoint,
-  onRemovePoint,
+  onUndo,
+  onClear,
   onSave,
   loading
 }) => {
-  const [inputX, setInputX] = useState('');
-  const [inputY, setInputY] = useState('');
   const [formData, setFormData] = useState({
     nom_titre: '',
     adresse: '',
@@ -58,21 +58,7 @@ export const DeclarationForm: React.FC<DeclarationFormProps> = ({
   const taxe_dh = areaM2 * (parseFloat(formData.prix_m) || 0);
   const coordText = points.length > 0 ? `${points[0].lat.toFixed(6)}, ${points[0].lng.toFixed(6)}` : '';
 
-  const handleAddPoint = () => {
-    const x = parseFloat(inputX);
-    const y = parseFloat(inputY);
-    if (!isNaN(x) && !isNaN(y)) {
-      onAddPoint(x, y, crs);
-      setInputX('');
-      setInputY('');
-    }
-  };
-
   const handleSave = () => {
-    if (points.length < 3) {
-      alert('يجب إدخال 3 نقاط على الأقل للمضلع');
-      return;
-    }
     onSave({
       ...formData,
       prix_m: parseFloat(formData.prix_m) || 0,
@@ -85,58 +71,70 @@ export const DeclarationForm: React.FC<DeclarationFormProps> = ({
   };
 
   return (
-    <div className="absolute top-24 right-8 bottom-8 w-[400px] bg-white/95 backdrop-blur-md rounded-[2rem] shadow-2xl border border-white/20 flex flex-col overflow-hidden z-[1000] selection:bg-gov-blue/20">
-      {/* Header */}
-      <div className="p-6 bg-gov-blue text-white relative">
-        <div className="flex items-center gap-3">
-          <Building2 className="w-8 h-8 text-gov-green" />
-          <h1 className="text-xl font-bold font-display">إقرار العقار المجالي</h1>
-        </div>
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none overflow-hidden">
-          <MapIcon className="w-64 h-64 -translate-x-1/2 -translate-y-1/2" />
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-gray-200">
-        {/* Section: Polygon Definition */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-gov-blue">
-            <MapPin className="w-4 h-4" />
-            <h3 className="font-bold text-sm">تحديد الوعاء العقاري</h3>
-          </div>
-          
-          <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 space-y-3">
-            <select 
-              value={crs}
-              onChange={(e) => setCrs(e.target.value as CRS)}
-              className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-gov-blue/50"
-            >
-              <option value="EPSG:26191">Lambert - المغرب (Zone 1)</option>
-              <option value="WGS84">درجات (WGS84)</option>
-            </select>
-
-            <div className="flex gap-2">
-              <input 
-                type="number" placeholder="X" value={inputX} onChange={(e) => setInputX(e.target.value)}
-                className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none"
-              />
-              <input 
-                type="number" placeholder="Y" value={inputY} onChange={(e) => setInputY(e.target.value)}
-                className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none"
-              />
+    <div className="flex-1 bg-gray-50 p-8 overflow-y-auto w-full flex justify-center selection:bg-gov-blue/20" dir="rtl">
+      <div className="max-w-xl w-full bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 flex flex-col overflow-hidden self-start">
+        {/* Header */}
+        <div className="p-8 bg-gov-blue text-white relative">
+          <div className="flex justify-between items-start mb-6">
+            <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-sm">
+              <Building2 className="w-10 h-10 text-gov-green" />
             </div>
-            
-            <button 
-              onClick={handleAddPoint}
-              className="w-full bg-gov-blue text-white rounded-xl py-2 font-bold text-xs flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all"
-            >
-              <Plus className="w-4 h-4" /> إضافة نقطة
-            </button>
+            <div className="flex gap-2">
+              <button 
+                onClick={onUndo}
+                className="bg-white/10 hover:bg-white/20 p-2 px-3 rounded-xl transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
+              >
+                <Undo2 className="w-4 h-4" />
+                تراجع
+              </button>
+              <button 
+                onClick={() => {
+                  onClear();
+                  window.dispatchEvent(new CustomEvent('nav-to-map'));
+                }}
+                className="bg-red-500/20 hover:bg-red-500/40 p-2 px-3 rounded-xl transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-red-100"
+              >
+                <Trash2 className="w-4 h-4 text-red-300" />
+                إلغاء الإقرار
+              </button>
+              <button 
+                onClick={() => window.dispatchEvent(new CustomEvent('nav-to-map'))}
+                className="bg-white/10 hover:bg-white/20 p-2 px-3 rounded-xl transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                المحل العقاري
+              </button>
+            </div>
+          </div>
+          <div>
+            <h1 className="text-2xl font-black font-display tracking-tight">إقرار العقار المجالي</h1>
+            <p className="text-white/60 text-xs font-medium mt-1 uppercase tracking-widest">نموذج التصريح القانوني المعياري</p>
+          </div>
+          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none overflow-hidden">
+            <MapIcon className="w-80 h-80 -translate-x-1/2 -translate-y-1/2" />
           </div>
         </div>
 
-        {/* Section: Personal Info */}
-        <div className="space-y-4">
+        <div className="p-8 space-y-10">
+          {/* Section: Context Overview */}
+          <div className="bg-gray-50 rounded-3xl p-6 border border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="bg-gov-blue/5 p-3 rounded-2xl">
+                <MapPin className="w-6 h-6 text-gov-blue" />
+              </div>
+              <div>
+                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1 px-1">الموقع المحدد</div>
+                <div className="text-sm font-black text-gov-blue bg-white px-3 py-1 rounded-lg border border-gray-100">{coordText || 'لم يتم تحديد موقع'}</div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1 px-1">المساحة النهائية</div>
+              <div className="text-lg font-black text-gov-green">{areaM2.toLocaleString()} م²</div>
+            </div>
+          </div>
+
+          {/* Section: Personal Info */}
+          <div className="space-y-4">
           <div className="flex items-center gap-2 text-gov-blue">
             <User className="w-4 h-4" />
             <h3 className="font-bold text-sm">معلومات صاحب الإقرار</h3>
@@ -249,14 +247,14 @@ export const DeclarationForm: React.FC<DeclarationFormProps> = ({
               </div>
             </div>
           </div>
+          </div>
         </div>
-      </div>
 
-      {/* Action Footer */}
-      <div className="p-6 bg-white border-t border-gray-100">
+        {/* Action Footer */}
+        <div className="p-6 bg-white border-t border-gray-100">
         <button 
           onClick={handleSave}
-          disabled={loading || points.length < 3}
+          disabled={loading}
           className={cn(
             "w-full bg-gov-blue text-white rounded-2xl py-4 font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-gov-blue/20 active:scale-95 transition-all disabled:opacity-30 disabled:grayscale disabled:scale-100",
             loading && "cursor-wait"
@@ -271,6 +269,7 @@ export const DeclarationForm: React.FC<DeclarationFormProps> = ({
             </>
           )}
         </button>
+      </div>
       </div>
     </div>
   );

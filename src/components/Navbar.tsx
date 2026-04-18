@@ -1,10 +1,10 @@
 import React from 'react';
-import { Map as MapIcon, Database, AlertCircle } from 'lucide-react';
+import { Map as MapIcon, Database, FileText, ChevronLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface NavbarProps {
-  activeView: 'map' | 'registry';
-  onViewChange: (view: 'map' | 'registry') => void;
+  activeView: 'map' | 'registry' | 'declaration';
+  onViewChange: (view: 'map' | 'registry' | 'declaration') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange }) => {
@@ -20,6 +20,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange }) => {
         <MapIcon className="w-4 h-4" />
         خريطة العقارات
       </button>
+
       <button 
         onClick={() => onViewChange('registry')}
         className={cn(
@@ -30,7 +31,19 @@ export const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange }) => {
         <Database className="w-4 h-4" />
         سجل البيانات
       </button>
+
       <div className="w-[1px] h-6 bg-gray-200 mx-2" />
+
+      <button 
+        onClick={() => onViewChange('declaration')}
+        className={cn(
+          "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all relative overflow-hidden group",
+          activeView === 'declaration' ? "bg-gov-green text-white shadow-lg" : "text-gray-500 hover:bg-gray-50"
+        )}
+      >
+        <FileText className="w-4 h-4" />
+        تعبئة الإقرار
+      </button>
     </div>
   );
 };

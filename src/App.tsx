@@ -13,12 +13,12 @@ import { LandDeclaration } from './types';
 import { supabase } from './lib/supabase';
 
 export default function App() {
-  const [activeView, setActiveView] = useState<'map' | 'registry'>('map');
+  const [activeView, setActiveView] = useState<'map' | 'registry' | 'declaration'>('map');
   const [declarations, setDeclarations] = useState<LandDeclaration[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Fetch from Supabase on mount
-  const fetchDeclarations = async () => {
+  const fetchDeclarations = typeof supabase !== 'undefined' ? async () => {
     const { data, error } = await supabase
       .from('polygons')
       .select('*')
@@ -32,20 +32,30 @@ export default function App() {
     if (data) {
       setDeclarations(data as LandDeclaration[]);
     }
-  };
+  } : () => {};
 
   useEffect(() => {
-    fetchDeclarations();
+    if (typeof fetchDeclarations === 'function') {
+      fetchDeclarations();
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleNav = () => setActiveView('map');
+    window.addEventListener('nav-to-map', handleNav);
+    return () => window.removeEventListener('nav-to-map', handleNav);
   }, []);
 
   const {
     points,
+    setPoints,
     areaM2,
     areaHa,
     crs,
     setCrs,
     addPoint,
     removePoint,
+    undoLastPoint,
     clearPoints,
   } = useSpatialLogic();
 
@@ -68,48 +78,46 @@ export default function App() {
     setActiveView('registry');
   };
 
-  const handleMapClick = (lat: number, lng: number) => {
-    if (activeView === 'map') {
-      addPoint(lng, lat, 'WGS84'); // WGS84 for direct map clicks
-    }
-  };
-
   return (
     <div className="flex w-screen h-screen overflow-hidden font-sans select-none bg-gray-50" dir="rtl">
-      <Navbar activeView={activeView} onViewChange={setActiveView} />
+      <Navbar 
+        activeView={activeView} 
+        onViewChange={setActiveView} 
+      />
 
       <div className="flex-1 flex overflow-hidden relative">
-        {activeView === 'map' ? (
-          <div className="w-full h-full relative flex">
-            <div className="flex-1 relative">
-              <MapControl 
-                points={points} 
-                onMapClick={handleMapClick}
-                savedDeclarations={declarations}
-                onQuickSave={() => {
-                  // This will be handled by the form's handleSave, but we could trigger it from here
-                  // For now, it just scrolls the form into view if needed, but the form is always visible
-                  // Let's actually trigger a "draft" state or just focus the form
-                  const saveBtn = document.querySelector('button[class*="bg-gov-blue"]') as HTMLButtonElement;
-                  saveBtn?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                onClear={clearPoints}
-                areaM2={areaM2}
-              />
-            </div>
-            <DeclarationForm 
+        {activeView === 'map' && (
+          <div className="w-full h-full relative">
+            <MapControl 
+              savedDeclarations={declarations}
               points={points}
-              areaM2={areaM2}
-              areaHa={areaHa}
-              crs={crs}
-              setCrs={setCrs}
               onAddPoint={addPoint}
               onRemovePoint={removePoint}
-              onSave={handleSave}
-              loading={loading}
+              onUndo={undoLastPoint}
+              onClear={clearPoints}
+              crs={crs}
+              setCrs={setCrs}
+              areaM2={areaM2}
+              onFinishDrawing={() => setActiveView('declaration')}
             />
           </div>
-        ) : (
+        )}
+
+        {activeView === 'declaration' && (
+          <DeclarationForm 
+            points={points}
+            areaM2={areaM2}
+            areaHa={areaHa}
+            crs={crs}
+            setCrs={setCrs}
+            onUndo={undoLastPoint}
+            onClear={clearPoints}
+            onSave={handleSave}
+            loading={loading}
+          />
+        )}
+
+        {activeView === 'registry' && (
           <Registry 
             data={declarations}
             onViewOnMap={(decl) => {

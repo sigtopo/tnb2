@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
 
 @theme {
   --font-sans: 'IBM Plex Sans Arabic', 'Outfit', ui-sans-serif, system-ui, sans-serif;
@@ -26,4 +26,10 @@
 /* Fix for Leaflet RTL issues if any */
 .leaflet-popup-content-wrapper {
   text-align: right;
+}
+
+/* Hide standard draw controls as we use custom UI */
+.leaflet-draw-toolbar,
+.leaflet-draw-actions {
+  display: none !important;
 }
