@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  --font-sans: 'IBM Plex Sans Arabic', 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Outfit', 'IBM Plex Sans Arabic', sans-serif;
+  
+  --color-gov-blue: #1a3a5a;
+  --color-gov-green: #27ae60;
+  --color-gov-red: #d63031;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-[#f8f9fa] text-[#333] selection:bg-gov-blue/10 selection:text-gov-blue;
+    direction: rtl;
+  }
+}
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+/* Fix for Leaflet RTL issues if any */
+.leaflet-popup-content-wrapper {
+  text-align: right;
+}

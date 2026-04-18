@@ -1,0 +1,8 @@
+{
+  "name": "منصة التدبير المجالي - جماعة أولاد صغير",
+  "description": "نظام تدبير العقارات والجبايات المحلية لجماعة أولاد صغير - إقليم سطات",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}
