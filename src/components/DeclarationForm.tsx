@@ -30,6 +30,7 @@ interface DeclarationFormProps {
   onClear: () => void;
   onSave: (data: Partial<LandDeclaration>) => void;
   loading?: boolean;
+  initialData?: LandDeclaration | null;
 }
 
 export const DeclarationForm: React.FC<DeclarationFormProps> = ({
@@ -41,7 +42,8 @@ export const DeclarationForm: React.FC<DeclarationFormProps> = ({
   onUndo,
   onClear,
   onSave,
-  loading
+  loading,
+  initialData
 }) => {
   const [formData, setFormData] = useState({
     nom_titre: '',
@@ -55,12 +57,41 @@ export const DeclarationForm: React.FC<DeclarationFormProps> = ({
     prix_m: '',
   });
 
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        nom_titre: initialData.nom_titre || '',
+        adresse: initialData.adresse || '',
+        id_cin: initialData.id_cin || '',
+        tel: initialData.tel || '',
+        email: initialData.email || '',
+        qualite: initialData.qualite || '',
+        num_titre: initialData.num_titre || '',
+        site_loc: initialData.site_loc || 'مركز جماعة اولاد صغير',
+        prix_m: initialData.prix_m?.toString() || '',
+      });
+    } else {
+      setFormData({
+        nom_titre: '',
+        adresse: '',
+        id_cin: '',
+        tel: '',
+        email: '',
+        qualite: '',
+        num_titre: '',
+        site_loc: 'مركز جماعة اولاد صغير',
+        prix_m: '',
+      });
+    }
+  }, [initialData]);
+
   const taxe_dh = areaM2 * (parseFloat(formData.prix_m) || 0);
   const coordText = points.length > 0 ? `${points[0].lat.toFixed(6)}, ${points[0].lng.toFixed(6)}` : '';
 
   const handleSave = () => {
     onSave({
       ...formData,
+      id: initialData?.id, // Pass ID if editing
       prix_m: parseFloat(formData.prix_m) || 0,
       taxe_dh,
       surf_m2: areaM2,

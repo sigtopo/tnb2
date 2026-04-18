@@ -42,7 +42,7 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
 }) => {
   const [inputX, setInputX] = useState('');
   const [inputY, setInputY] = useState('');
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [isListExpanded, setIsListExpanded] = useState(true);
 
   const handleAdd = (e: React.FormEvent) => {
@@ -57,31 +57,26 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
   };
 
   return (
-    <div className="absolute left-6 top-6 z-[1001] w-85 space-y-4 font-sans" dir="rtl">
-      {/* Official Tool Header */}
+    <div className="absolute right-6 top-6 z-[1001] flex flex-col items-end gap-3 font-sans" dir="ltr">
+      {/* Official Tool Toggle Icon */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-[#1a3a5a] text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between group transition-all hover:bg-[#162e48] border border-white/10"
+        className={cn(
+          "w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-all border border-white/10 active:scale-95",
+          isOpen ? "bg-gov-red text-white" : "bg-gov-blue text-white"
+        )}
+        title={isOpen ? "Fermer" : "Coordonnées Géographiques"}
       >
-        <div className="flex items-center gap-4">
-          <div className="bg-white/10 p-2.5 rounded-xl backdrop-blur-sm group-hover:bg-white/20 transition-all">
-            <ShieldCheck className="w-5 h-5 text-gov-green" />
-          </div>
-          <div className="text-right">
-            <div className="font-black text-sm tracking-tight">المنصة الجغرافية العقارية</div>
-            <div className="text-[9px] text-white/50 uppercase font-bold tracking-[0.2em]">نظام إدخال الإحداثيات الرسمي</div>
-          </div>
-        </div>
-        <Navigation className={cn("w-4 h-4 text-white/30 transition-transform duration-500", isOpen ? "rotate-180" : "")} />
+        {isOpen ? <Plus className="w-6 h-6 rotate-45" /> : <Hash className="w-6 h-6" />}
       </button>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="bg-white rounded-[2rem] shadow-[0_25px_50px_-12px_rgba(26,58,90,0.25)] border border-gray-100 overflow-hidden flex flex-col"
+            initial={{ opacity: 0, scale: 0.95, x: 20 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.95, x: 20 }}
+            className="w-85 bg-white rounded-[2rem] shadow-[0_25px_50px_-12px_rgba(26,58,90,0.25)] border border-gray-100 overflow-hidden flex flex-col text-left"
           >
             {/* System Selection Tab Bar */}
             <div className="p-2 bg-gray-50 flex gap-1">
@@ -95,7 +90,7 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
                 )}
               >
                 <Milestone className="w-3.5 h-3.5" />
-                لامبرت المغرب
+                Lambert Maroc
               </button>
               <button 
                 onClick={() => setCrs('WGS84')}
@@ -107,7 +102,7 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
                 )}
               >
                 <Globe className="w-3.5 h-3.5" />
-                WGS84 (درجات)
+                WGS84 (Deg)
               </button>
             </div>
 
@@ -116,9 +111,9 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
               <form onSubmit={handleAdd} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-gray-500 mr-2 uppercase tracking-wider flex items-center gap-1.5">
+                    <label className="text-[10px] font-black text-gray-500 ml-2 uppercase tracking-wider flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-gov-blue/30" />
-                      {crs === 'EPSG:26191' ? 'الإحداثي X' : 'خط الطول (Lng)'}
+                      {crs === 'EPSG:26191' ? 'Coordonnée X' : 'Longitude (Lng)'}
                     </label>
                     <input 
                       type="number" step="any"
@@ -130,9 +125,9 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-gray-500 mr-2 uppercase tracking-wider flex items-center gap-1.5">
+                    <label className="text-[10px] font-black text-gray-500 ml-2 uppercase tracking-wider flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-gov-red/30" />
-                      {crs === 'EPSG:26191' ? 'الإحداثي Y' : 'خط العرض (Lat)'}
+                      {crs === 'EPSG:26191' ? 'Coordonnée Y' : 'Latitude (Lat)'}
                     </label>
                     <input 
                       type="number" step="any"
@@ -149,7 +144,7 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
                   className="w-full bg-gov-blue text-white rounded-2xl py-3.5 font-black text-sm flex items-center justify-center gap-3 hover:bg-[#162e48] active:scale-95 transition-all shadow-xl shadow-gov-blue/20 group"
                 >
                   <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                  إضافة النقطة المساحية
+                  Ajouter le Point
                 </button>
               </form>
             </div>
@@ -164,7 +159,7 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
                   <div className="bg-gov-blue/10 p-1.5 rounded-lg">
                     <Hash className="w-4 h-4 text-gov-blue" />
                   </div>
-                  <span className="text-[11px] font-black text-gov-blue uppercase tracking-wider">سجل النقط المحملة ({points.length})</span>
+                  <span className="text-[11px] font-black text-gov-blue uppercase tracking-wider">Points Saisis ({points.length})</span>
                 </div>
                 {isListExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
               </button>
@@ -178,10 +173,10 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
                     className="overflow-hidden border-b border-gray-100"
                   >
                     <div className="max-h-56 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
-                      <table className="w-full text-right text-[10px]">
+                      <table className="w-full text-left text-[10px]">
                         <thead className="bg-[#1a3a5a]/5 sticky top-0 backdrop-blur-sm z-10">
                           <tr>
-                            <th className="p-3 font-black text-gray-500 uppercase tracking-widest text-[9px]">الرقم</th>
+                            <th className="p-3 font-black text-gray-500 uppercase tracking-widest text-[9px]">№</th>
                             <th className="p-3 font-black text-gray-500 uppercase tracking-widest text-[9px]">X / Longitude</th>
                             <th className="p-3 font-black text-gray-500 uppercase tracking-widest text-[9px]">Y / Latitude</th>
                             <th className="p-3"></th>
@@ -213,7 +208,7 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
                               <td colSpan={4} className="p-12 text-center">
                                 <div className="flex flex-col items-center gap-2 opacity-20 grayscale">
                                   <Hash className="w-8 h-8" />
-                                  <span className="text-[10px] font-black uppercase tracking-widest">في انتظار إدخال البيانات</span>
+                                  <span className="text-[10px] font-black uppercase tracking-widest">EN ATTENTE DE DONNÉES</span>
                                 </div>
                               </td>
                             </tr>
@@ -232,14 +227,14 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
                 <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-1">
                   <div className="flex items-center gap-2 text-gov-green">
                     <Move className="w-3.5 h-3.5" />
-                    <span className="text-[9px] font-black uppercase tracking-wider">المساحة م²</span>
+                    <span className="text-[9px] font-black uppercase tracking-wider">Surface m²</span>
                   </div>
                   <div className="text-xl font-black text-gov-green tracking-tight">{areaM2.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
                 </div>
                 <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-1">
                   <div className="flex items-center gap-2 text-gov-blue">
                     <Milestone className="w-3.5 h-3.5" />
-                    <span className="text-[9px] font-black uppercase tracking-wider">المساحة Ha</span>
+                    <span className="text-[9px] font-black uppercase tracking-wider">Surface Ha</span>
                   </div>
                   <div className="text-xl font-black text-gov-blue tracking-tight">{(areaM2 / 10000).toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>
                 </div>
@@ -252,7 +247,7 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
                   className="flex-1 bg-white text-gray-500 rounded-xl py-2.5 text-[10px] font-bold border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-30 flex items-center justify-center gap-2"
                 >
                   <Undo2 className="w-3.5 h-3.5" />
-                  تراجع
+                  Annuler
                 </button>
                 <button 
                   onClick={onClear}
@@ -260,7 +255,7 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
                   className="flex-1 bg-white text-red-500 rounded-xl py-2.5 text-[10px] font-bold border border-gray-200 hover:bg-red-50 hover:border-red-100 transition-all disabled:opacity-30 flex items-center justify-center gap-2"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  إفراغ السجل
+                  Effacer
                 </button>
               </div>
 
@@ -271,7 +266,7 @@ export const CoordinateTool: React.FC<CoordinateToolProps> = ({
               >
                 <div className="absolute inset-x-0 bottom-0 h-1 bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform" />
                 <CheckCircle2 className="w-5 h-5" />
-                المصادقة النهائية وحفظ المضلع
+                Valider et Enregistrer
               </button>
             </div>
           </motion.div>
